@@ -4,8 +4,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css' rel='stylesheet' />
 </head>
@@ -150,7 +161,11 @@ body, html {
   bottom: 0;
   right: 0;
   width: 320px;
-  border: 4px solid Steelblue;
+  padding-left: 20px;
+  padding-right: 20px;
+
+  /*border: 2px solid black;*/
+  background-color: #ff9900;
 }
 .yup{
   position: absolute;
@@ -161,12 +176,13 @@ body, html {
   border: 2px solid white;
 }
 .navbar {
+    /* margin-top: 30px; */
     margin-bottom: 0;
     border-radius: 0;
     background-color: Steelblue;
 }
 .ul{
-  background-color: Steelblue;
+  background-color: white;
 }
 .icon-bar a {
   display: block;
@@ -183,6 +199,57 @@ body, html {
   margin-left: 75px;
   font-size: 30px;
 }
+.tabs {
+    position:relative;
+    min-height:200px;
+    clear:both;
+    margin:25px 0;
+}
+.tab {
+    float:left;
+    display: none;
+}
+.tab:first-of-type {
+    display: inline-block;
+}
+.tabs-link {
+    position: relative;
+    top: -14px;
+    height: 20px;
+    left: -40px;
+}
+.tab-link {
+    background:#eee;
+    display: inline-block;
+    padding:10px;
+    border:1px solid #ccc;
+    margin-left:-1px;
+    position:relative;
+    list-style-type: none;
+    left:1px;
+    top:1px;
+    cursor:pointer;
+}
+.tab-link {
+    background:#f8f8f8;
+}
+.content-popup {
+    background:white;
+    position:absolute;
+    width: 500px;
+    height: 90%;
+    top:48px;
+    /* left:0;
+    right:0;
+    bottom:0; */
+    padding:20px;
+    border:1px solid #ccc;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+.tab:target {
+    display: block;
+}
 </style>
 
 <head>
@@ -195,14 +262,15 @@ body, html {
        foo: 'bar', attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
       }).addTo(earth);
      newsAPI();
-     earth.setView([31.968599, -99.901810], 3);
+     //eventsAPI();
+     earth.setView([-10,130], 3);
     }
     //fly to different places
     function panTo(coords){
        earth.panTo(coords);
     }
-    function flyToAmerica(){
-       earth.panInsideBounds([[41,-98],[41,-98]],{heading: 0, tilt: 0, duration: 2});
+    function flyTo(){
+       earth.panInsideBounds([[-10,130],[-10,130]],{heading: 0, tilt: 0, duration: 2});
     }
   </script>
   <style>
@@ -228,7 +296,7 @@ body, html {
          overflow:hidden;
        }
 </style>
-<title>MapOutbreaks</title>
+<title>Travelolo</title>
 </head>
 
 <body onload="initialize()">
@@ -243,7 +311,7 @@ body, html {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#"><font size="4" color="white">MapOutbreaks</a></font>
+            <a class="navbar-brand" href="#"><font size="4" color="white">Travelolo</a></font>
         </div>
     <div class="collapse navbar-collapse" id="myNavbar" background-color="Steelblue">
         <ul class="nav navbar-nav" background-color="Steelblue">
@@ -260,7 +328,7 @@ body, html {
   <!-- Modal content -->
   <div class="modal-content">
     <span class="close">&times;</span>
-    <p><font size='3' color='black'><strong><u><center>MapOutbreaks<br></strong></u></center></font> <br>We are a team of software developers at UNSW who built an online platform which is utilizing online informal sources for disease outbreak monitoring and real-time surveillance of emerging public health threats. The freely available Web site deliver real-time intelligence on a broad range of emerging infectious diseases for a diverse audience including libraries, local health departments, governments, and international travelers.<br><br> MapOutbreaks brings together disparate data sources, including online news aggregators and validated official reports, to achieve a unified and comprehensive view of the current global state of infectious diseases and their effect on human and animal health. Through an automated process, updating 24/7/365, the system monitors, organizes, integrates, filters, visualizes and disseminates online information about emerging diseases in nine languages, facilitating early detection of global public health threats.</p></font>
+    <p><font size='3' color='black'><strong><u><center>Travelolo<br></strong></u></center></font> <br>Made with  <i style="color:red" class="fas fa-heart"></i>.<br><br> Travelolo keeps travelers updated with the events, outbreaks and weather of the destination.</p></font>
   </div>
 </div>
 
@@ -272,14 +340,12 @@ body, html {
 </div>
 
 <script>
-
 var modal = document.getElementById('myModal');
 var modal1 = document.getElementById('myModal1');
 var btn = document.getElementById("about");
 var btn1 = document.getElementById("contact");
 var span = document.getElementsByClassName("close")[0];
 var span1 = document.getElementsByClassName("close1")[0];
-
 btn.onclick = function() {
   modal.style.display = "block";
 }
@@ -318,17 +384,13 @@ window.onclick = function(event) {
 
 </div>
 
-<div class="yup">
-  <p><font size="3" color="yellow">Click on the pins to know more about the outbreak.</p></font>
-</div>
-
-<div class="box_and">
-    <center><font size="5" color="red">Latest News</font></center>
+<div class="box_and" >
+    <center><font size="5" color="white" ><b>Latest News</b></font></center>
     <marquee height="100%" direction = "up" scrollamount="3" onmousedown="this.stop();" onmouseup="this.start();"><font size="4" color="white"><p id="result"></p></font></marquee>
 </div>
 
 <div class="butpos">
-  <button style="font-size:30px"><i class="fa fa-map-marker" onclick="flyToAmerica()"></i></button>
+  <button style="font-size:30px"><i class="fa fa-map-marker" onclick="flyTo()"></i></button>
 </div>
 
 <script>
@@ -529,6 +591,8 @@ function locsCountry(place){
    lsls['south africa'] = {long: 22.937506, lat: -30.559482};
    lsls['zambia'] = {long: 27.849332, lat: -13.133897};
    lsls['zimbabwe'] = {long: 29.154857, lat: -19.015438};
+   lsls['sydney'] = {long: 151.2093, lat: -33.8688};
+   lsls['london'] = {long: -0.1278, lat: 51.5074};
     var arr = [];
     if (place in lsls){
       arr.push(lsls[place].lat);
@@ -536,7 +600,6 @@ function locsCountry(place){
     }
     return arr;
 }
-
 function getInput() {
   document.getElementById("error1").innerHTML = "";
   var xt = document.getElementById("startDate").value;
@@ -580,45 +643,87 @@ function getInput() {
              return response.json();
            })
           .then(function(data) {
-             //console.log(data)
              markLocationsRemove(locsARR);
-             markCountrySearch(data, earth, z);
+             eventsAPI(z, data, earth, cb);
           })
         }
     }
   }
 }
 window.locsARR = [];
-
 function markLocationsRemove(locsAR){
   for (i = 0; i<locsAR.length; i++){
     locsAR[i].removeFrom(earth);
   }
 }
-function markCountrySearch(data, earth, place){
-  var arr = locsCountry(place);
-  var locSub = "<font size='4' color='red'><strong>"+place+"</strong></font><br>"
-  if(arr == []){
-    return
-  }
-  var marker = WE.marker([arr[0], arr[1]]).addTo(earth);
-  var str = locSub+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[0].title+"</strong></u></font>"+"<br>"+data.articles[0].description+"<br>"+"<a href= "+data.articles[0].url+">"+"find out more"+"</a>"+"<br>"
-  //console.log(data.articles.length)
-  var limiter = 0;
-  for(i=1; i<data.articles.length; i++){
-    if (limiter < 2){
-      var str2 = "<br>"+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[i].title+"</strong></u></font>"+"<br>"+data.articles[i].description+"<br>"+"<a href= "+data.articles[i].url+">"+"find out more"+"</a>"+"<br>"
-      str = str+str2
-      limiter = limiter+1;
+function cb(data, data_event, data_weather, place, earth) {
+    var arr = locsCountry(place);
+    var locSub = "<font size='4' color='red'><strong>Outbreaks in "+place+"</strong></font><br>"
+    if(arr == []){
+      return
     }
-  }
-  //var str2 = "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[1].title+"</strong></u></font>"+"<br>"+data.articles[1].description+"<br>"+"<a href= "+data.articles[1].url+">"+"find out more"+"</a>"+"<br>"
-  marker.bindPopup(str, {maxWidth: 500, maxHeight: 2000,  closeButton: true}).openPopup();
-  panTo(arr);
-  locsARR.push(marker);
+    var marker = WE.marker([arr[0], arr[1]]).addTo(earth);
+    var locSub = "<font size='4' color='red'><strong>Outbreaks in "+place+"</strong></font><br>"
+    var str1 = locSub+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[0].title+"</strong></u></font>"+"<br>"+data.articles[0].description+"<br>"+"<a href= "+data.articles[0].url+">"+"find out more"+"</a>"+"<br>"
+    //console.log(data.articles.length)
+    var limiter = 0;
+    for(i=1; i<data.articles.length; i++){
+      if (limiter < 20){
+        var str2 = "<br>"+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[i].title+"</strong></u></font>"+"<br>"+data.articles[i].description+"<br>"+"<a href= "+data.articles[i].url+">"+"find out more"+"</a>"+"<br>"
+        str1 = str1+str2
+        limiter = limiter+1;
+      }
+    }
+    var eveSub = "<font size='4' color='red'><strong>Events in "+place+"</strong></font><br>"
+    var str =  eveSub + "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[0].name.text+"</strong></u></font>"+"<br>"+data_event.events[0].description.text+"<br>"+"<a href= "+data_event.events[0].url+">"+"find out more"+"</a>"+"<br>"
+    limiter = 0;
+    for(i=1; i<data_event.events.length; i++){
+      if (limiter < 20){
+        str2 = "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[i].name.text+"</strong></u></font>"+"<br>"+data_event.events[i].description.text+"<br>"+"<a href= "+data_event.events[i].url+">"+"find out more"+"</a>"+"<br>"
+        str = str+str2
+        limiter = limiter+1;
+      }
+    }
+    var wthSub = "<font size='4' color='red'><strong>Current Weather in "+place+"</strong></font><br>"
+
+
+
+    wthSub = wthSub + "<br>Temperature: "+(data_weather.main.temp-273).toFixed(1)+" C"+
+                      "<br>Min Temperature: "+(data_weather.main.temp_min-273).toFixed(1)+" C"+
+                      "<br>Max Temperature: "+(data_weather.main.temp_max-273).toFixed(1)+" C"+
+                      "<br>Humidity: "+data_weather.main.humidity+" %"+
+                      "<br>Pressure: "+data_weather.main.pressure+" hPa"+
+                      "<br>Wind Speed: "+data_weather.wind.speed+" m/s"+
+                      "<br>Details: "+data_weather.weather[0].description+"<br>  <br>";
+
+
+
+    var content = '<div class="tabs">' +
+              '<div class="tab" id="tab-1">' +
+              '<div class="content-popup">' +
+              '<b id="text1">'+str+'</b>' +
+              '</div>' +
+              '</div>' +
+              '<div class="tab" id="tab-2">' +
+              '<div class="content-popup">' +
+              '<b>'+str1+'</b>' +
+              '</div>' +
+              '</div>' +
+              '<div class="tab" id="tab-3">' +
+              '<div class="content-popup">' +
+              '<b>'+wthSub+'</b>' +
+              '</div>' +
+              '</div>' +
+              '<ul class="tabs-link">' +
+              '<li class="tab-link"> <a href="#tab-1"><span>Events</span></a></li>' +
+              '<li class="tab-link"> <a href="#tab-2"><span>Outbreaks</span></a></li>' +
+              '<li class="tab-link"> <a href="#tab-3"><span>Weather</span></a></li>' +
+              '</ul>' +
+          '</div>';
+          marker.bindPopup(content, {maxWidth: 500, maxHeight: 2000,  closeButton: true}).openPopup();
+          panTo(arr);
+          locsARR.push(marker);
 }
-
-
 function newsAPI(){
   fetch('https://cors-anywhere.herokuapp.com/https://newsapi.org/v2/everything?q=health AND outbreak&language=en&apiKey=84ceb92e06b44f1db554d716c0fa0a01', {
       method: 'GET',
@@ -639,6 +744,7 @@ function newsAPI(){
         var a = document.createElement('a');
         var node = document.createTextNode(""+ data.articles[i].title);
         a.appendChild(node);
+        a.setAttribute("style","color: #FFFFFF");
         a.href = ""+data.articles[i].url
         element.appendChild(a);
         var br1 = document.createElement("br");
@@ -648,7 +754,37 @@ function newsAPI(){
       }
   })
 }
-
+function eventsAPI(country, data,  earth, cb){
+    var url = "https://www.eventbriteapi.com/v3/events/search/?token=OSUIDAF6IGFCANDO4ZDG&location.address="+country.toLowerCase()+"&location.within=10km&expand=venue";
+    fetch(url, {
+        method: 'GET',
+        dataType: 'json'
+    })
+    .then((resp) => resp.json())
+    .then(function(data_event) {
+        weatherAPI(country, data, data_event, earth, cb);
+    })
+}
+function weatherAPI(country,data, data_event, earth, cb) {
+    var coor = locsCountry(country);
+    var url = 'http://api.openweathermap.org/data/2.5/weather?lat='+coor[0]+'&lon='+coor[1]+'&appid=01c9d1950104f17307f22b0cc04f8560';
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'en-GB,en;q=0.5',
+            'Connection':	'keep-alive'
+        }
+    })
+    .catch((e)=> console.log(e))
+    .then((resp) => resp.json())
+    .then(function(data_weather) {
+        console.log(data);
+        console.log(data_event);
+        console.log(data_weather);
+        cb(data, data_event, data_weather, country, earth);
+    })
+}
 </script>
 </body>
 </html>
