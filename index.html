@@ -4,8 +4,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css' rel='stylesheet' />
 </head>
@@ -150,7 +161,11 @@ body, html {
   bottom: 0;
   right: 0;
   width: 320px;
-  border: 4px solid Steelblue;
+  padding-left: 20px;
+  padding-right: 20px;
+  
+  /*border: 2px solid black;*/
+  background-color: #ff9900;
 }
 .yup{
   position: absolute;
@@ -167,7 +182,7 @@ body, html {
     background-color: Steelblue;
 }
 .ul{
-  background-color: Steelblue;
+  background-color: white;
 }
 .icon-bar a {
   display: block;
@@ -281,7 +296,7 @@ body, html {
          overflow:hidden;
        }
 </style>
-<title>MapOutbreaks</title>
+<title>Travelolo</title>
 </head>
 
 <body onload="initialize()">
@@ -313,7 +328,7 @@ body, html {
   <!-- Modal content -->
   <div class="modal-content">
     <span class="close">&times;</span>
-    <p><font size='3' color='black'><strong><u><center>MapOutbreaks<br></strong></u></center></font> <br>We are a team of software developers at UNSW who built an online platform which is utilizing online informal sources for disease outbreak monitoring and real-time surveillance of emerging public health threats. The freely available Web site deliver real-time intelligence on a broad range of emerging infectious diseases for a diverse audience including libraries, local health departments, governments, and international travelers.<br><br> MapOutbreaks brings together disparate data sources, including online news aggregators and validated official reports, to achieve a unified and comprehensive view of the current global state of infectious diseases and their effect on human and animal health. Through an automated process, updating 24/7/365, the system monitors, organizes, integrates, filters, visualizes and disseminates online information about emerging diseases in nine languages, facilitating early detection of global public health threats.</p></font>
+    <p><font size='3' color='black'><strong><u><center>Travelolo<br></strong></u></center></font> <br>Made with  <i style="color:red" class="fas fa-heart"></i>.<br><br> Travelolo keeps travelers updated with the events, outbreaks and weather of the destination.</p></font>
   </div>
 </div>
 
@@ -371,8 +386,8 @@ window.onclick = function(event) {
 
 </div>
 
-<div class="box_and">
-    <center><font size="5" color="red">Latest News</font></center>
+<div class="box_and" >
+    <center><font size="5" color="white" ><b>Latest News</b></font></center>
     <marquee height="100%" direction = "up" scrollamount="3" onmousedown="this.stop();" onmouseup="this.start();"><font size="4" color="white"><p id="result"></p></font></marquee>
 </div>
 
@@ -578,6 +593,8 @@ function locsCountry(place){
    lsls['south africa'] = {long: 22.937506, lat: -30.559482};
    lsls['zambia'] = {long: 27.849332, lat: -13.133897};
    lsls['zimbabwe'] = {long: 29.154857, lat: -19.015438};
+   lsls['sydney'] = {long: 151.2093, lat: -33.8688};
+   lsls['london'] = {long: -0.1278, lat: 51.5074};
     var arr = [];
     if (place in lsls){
       arr.push(lsls[place].lat);
@@ -646,7 +663,7 @@ function markLocationsRemove(locsAR){
 }
 
 
-function cb(data, data_event, place, earth) {
+function cb(data, data_event, data_weather, place, earth) {
 
 
     var arr = locsCountry(place);
@@ -673,7 +690,6 @@ function cb(data, data_event, place, earth) {
     var eveSub = "<font size='4' color='red'><strong>Events in "+place+"</strong></font><br>"
     var str =  eveSub + "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[0].name.text+"</strong></u></font>"+"<br>"+data_event.events[0].description.text+"<br>"+"<a href= "+data_event.events[0].url+">"+"find out more"+"</a>"+"<br>"
     limiter = 0;
-    console.log("HERE");
     for(i=1; i<data_event.events.length; i++){
       if (limiter < 20){
         str2 = "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[i].name.text+"</strong></u></font>"+"<br>"+data_event.events[i].description.text+"<br>"+"<a href= "+data_event.events[i].url+">"+"find out more"+"</a>"+"<br>"
@@ -682,6 +698,21 @@ function cb(data, data_event, place, earth) {
       }
     }
 
+
+    var wthSub = "<font size='4' color='red'><strong>Current Weather in "+place+"</strong></font><br>"
+    
+    
+    
+    wthSub = wthSub + "<br>Temperature: "+(data_weather.main.temp-273).toFixed(1)+" C"+
+                      "<br>Min Temperature: "+(data_weather.main.temp_min-273).toFixed(1)+" C"+
+                      "<br>Max Temperature: "+(data_weather.main.temp_max-273).toFixed(1)+" C"+
+                      "<br>Humidity: "+data_weather.main.humidity+" %"+
+                      "<br>Pressure: "+data_weather.main.pressure+" hPa"+
+                      "<br>Wind Speed: "+data_weather.wind.speed+" m/s"+
+                      "<br>Details: "+data_weather.weather[0].description+"<br>  <br>";
+                      
+                      
+    
     var content = '<div class="tabs">' +
 
               '<div class="tab" id="tab-1">' +
@@ -698,7 +729,7 @@ function cb(data, data_event, place, earth) {
 
               '<div class="tab" id="tab-3">' +
               '<div class="content-popup">' +
-              '<b>Tab 3 content</b>' +
+              '<b>'+wthSub+'</b>' +
               '</div>' +
               '</div>' +
 
@@ -735,6 +766,7 @@ function newsAPI(){
         var a = document.createElement('a');
         var node = document.createTextNode(""+ data.articles[i].title);
         a.appendChild(node);
+        a.setAttribute("style","color: #FFFFFF");
         a.href = ""+data.articles[i].url
         element.appendChild(a);
         var br1 = document.createElement("br");
@@ -747,7 +779,6 @@ function newsAPI(){
 
 
 function eventsAPI(country, data,  earth, cb){
-    var str1 = "<font size='4' color='red'><strong>Events in "+country+"</strong></font><br>";
     var url = "https://www.eventbriteapi.com/v3/events/search/?token=OSUIDAF6IGFCANDO4ZDG&location.address="+country.toLowerCase()+"&location.within=10km&expand=venue";
     fetch(url, {
         method: 'GET',
@@ -755,12 +786,34 @@ function eventsAPI(country, data,  earth, cb){
     })
     .then((resp) => resp.json())
     .then(function(data_event) {
-        console.log(data_event);
-        console.log(data);
 
+        weatherAPI(country, data, data_event, earth, cb);
 
-        cb(data, data_event, country, earth);
     })
+}
+
+function weatherAPI(country,data, data_event, earth, cb) {
+    var coor = locsCountry(country);
+    var url = 'http://api.openweathermap.org/data/2.5/weather?lat='+coor[0]+'&lon='+coor[1]+'&appid=01c9d1950104f17307f22b0cc04f8560';
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'en-GB,en;q=0.5',
+            'Connection':	'keep-alive'
+        }
+    })
+    .catch((e)=> console.log(e))
+    .then((resp) => resp.json())
+    .then(function(data_weather) {
+        console.log(data);
+        console.log(data_event);
+        console.log(data_weather);
+
+        cb(data, data_event, data_weather, country, earth);
+    })
+
+
 }
 
 </script>
