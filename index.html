@@ -630,11 +630,11 @@ function getInput() {
            })
           .then(function(data) {
              //console.log(data)
-             //eventsAPI(z);
+             eventsAPI(z, console.log);
              // console.log(data_event);
              markLocationsRemove(locsARR);
              markCountrySearch(data, earth, z);
-
+             //eventsAPI(z);
           })
         }
     }
@@ -649,10 +649,8 @@ function markLocationsRemove(locsAR){
 }
 function markCountrySearch(data, earth, place){
 
-  // var evSub = "<font size='4' color='red'><strong>Events in "+place+"</strong></font><br>"
-  // var str1 = evSub  + "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[0].name.text+"</strong></u></font>"+"<br>"+data_event.events[0].description+"<br>"+"<a href= "+data_event.events[0].url+">"+"find out more"+"</a>"+"<br>"
-  // var limiter1 = 0;
-  //console.log("DUHH"+data_event);
+
+
   var arr = locsCountry(place);
   var locSub = "<font size='4' color='red'><strong>Outbreaks in "+place+"</strong></font><br>"
   if(arr == []){
@@ -686,7 +684,7 @@ function markCountrySearch(data, earth, place){
 
             '<div class="tab" id="tab-1">' +
             '<div class="content-popup">' +
-            '<b>aaaa</b>' +
+            '<b id="text1"></b>' +
             '</div>' +
             '</div>' +
 
@@ -749,19 +747,20 @@ function newsAPI(){
 }
 
 
-function eventsAPI(country){
-    console.log("LOCATION: ",country)
-    url = "https://www.eventbriteapi.com/v3/events/search/?token=OSUIDAF6IGFCANDO4ZDG&location.address="+country.toLowerCase()+"&location.within=10km&expand=venue";
-    console.log(url);
-  fetch(url, {
-      method: 'GET',
-      dataType: 'json'
-  })
-  .then((resp) => resp.json())
-  .then(function(data_event) {
-      console.log(data_event);
-      //data_event;
-  })
+function eventsAPI(country, cb){
+    var str1 = "<font size='4' color='red'><strong>Events in "+country+"</strong></font><br>";
+    var url = "https://www.eventbriteapi.com/v3/events/search/?token=OSUIDAF6IGFCANDO4ZDG&location.address="+country.toLowerCase()+"&location.within=10km&expand=venue";
+    fetch(url, {
+        method: 'GET',
+        dataType: 'json'
+    })
+    .then((resp) => resp.json())
+    .then(function(data_event) {
+        console.log(data_event);
+        str1 = str1 +  "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[0].name.text+"</strong></u></font>"+"<br>"+data_event.events[0].description+"<br>"+"<a href= "+data_event.events[0].url+">"+"find out more"+"</a>"+"<br>"
+        
+        cb(str1);
+    })
 }
 
 </script>
