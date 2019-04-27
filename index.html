@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css' rel='stylesheet' />
+</head>
+<style>
+
+body {margin:0;height:0;}
+* {box-sizing: border-box;}
+
+.custom .pop-up-wrap-text{
+  overflow: auto;
+}
+
+.sidenav {
+  height: 50%;
+  width: 0;
+  left: 90;
+  top: 40;
+  right: 0;
+  position: fixed;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 20px;
+}
+
+.sidenav a {
+  position: fixed;
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 25px;
+  margin-left: 0;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+.popup {
+  overflow: auto;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/* The actual popup */
+.popup .popuptext {
+  overflow: auto;
+  word-wrap: break-word;
+  visibility: hidden;
+  width: 400px;
+  background-color: white;
+  color: #fff;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: fixed;
+  z-index: 1;
+  bottom: 0;
+  left: 100%;
+  margin-left: 0;
+}
+/* Popup arrow */
+.popup .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Toggle this class - hide and show the popup */
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity:1 ;}
+}
+
+.butpos{
+  position:fixed;
+  left: 1%;
+  bottom: 2%;
+}
+
+.bottomright {
+  word-wrap: break-word;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+}
+
+.box_and {
+  position: absolute;
+  top: 60%;
+  bottom: 0;
+  right: 0;
+  width: 320px;
+  border: 4px solid Steelblue;
+}
+
+.navbar {
+    margin-bottom: 0;
+    border-radius: 0;
+    background-color: Steelblue;
+}
+
+ul{
+  background-color: Steelblue;
+}
+
+.content {
+  margin-left: 75px;
+  font-size: 30px;
+}
+</style>
+
+<head>
+<script src="http://www.webglearth.com/v2/api.js"></script>
+  <script>
+    function initialize() {
+        //var options = {atmosphere: true, center: [0, 0], zoom: 0, sky: true, zooming: true,  unconstrainedRotation: true};
+        //var earth = new WE.map('earth_div', options);
+      window.options = {atmosphere: true, center: [0, 0], zoom: 0, sky: true, zooming: true,  unconstrainedRotation: true};
+      window.earth = new WE.map('earth_div', options);
+      WE.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?{foo}', {
+       foo: 'bar', attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+      }).addTo(earth);
+     //var city = document.getElementById("search_by_location()").value;
+     newsAPI();
+     earth.setView([31.968599, -99.901810], 3);
+     initShow();
+     //markLocationsRemove()
+    }
+    function panTo(coords){
+       earth.panTo(coords);
+    }
+    function flyToAmerica(){
+       earth.panInsideBounds([[41,-98],[41,-98]],{heading: 0, tilt: 0, duration: 2});
+    }
+    function initShow(){
+      fetch('http://0.0.0.0:5000/show', {
+      //fetch('https://cors-anywhere.herokuapp.com/http://0.0.0.0:5000/outbreaktable/show/2019-02-15T03:00:00/2019-02-25T03:00:00', {
+          method: 'GET',
+          dataType: 'json',
+          crossdomain: 'true',
+          headers: {
+              'Access-Control-Allow-Origin': 'http://127.0.0.1:12000',
+              'Access-Control-Allow-Methods': 'GET',
+              'Access-Control-Allow-Headers': 'Content-Type',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          }
+      })
+      .then((resp) => resp.json())
+      .then(function(data) {
+          var len = Object.keys(data).length;
+          console.log(Object.keys(data).length);
+          for (let i = 0; i<len; i++){
+            markLocations(data[i], earth);
+            //markLocationsRemove(data[i], earth);
+            //earth.setMap(null);
+          }
+      })
+    }
+  </script>
+  <style>
+       html, body{
+         padding: 0;
+         margin-left: 0;
+         margin-right: 0;
+       }
+       #earth_div{
+         top: 0;
+         right: 0;
+         bottom: 0;
+         left: 0;
+         background-color: #fff;
+         position: absolute !important;
+         background-size: cover
+       }
+</style>
+<title>MapOutbreaks</title>
+</head>
+
+<body onload="initialize()">
+  <div id="earth_div"></div>
+</body>
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#"><font size="4" color="white">MapOutbreaks</a></font>
+        </div>
+    <div class="collapse navbar-collapse" id="myNavbar" background-color="Steelblue">
+        <ul class="nav navbar-nav" background-color="Steelblue">
+            <li><a href="#"><font size="4" color="white">Home</a></li></font>
+            <li><a onclick="myFunction()"><font size="4" color="white">About</a></li></font>
+            <li><a onclick=" myFunctionContactUs()"><font size="4" color="white">Contact Us</a></li></font>
+        </ul>
+    <span style="font-size:20px;float:right;margin-top:1%;color:white;cursor:pointer" onclick="openNav()">&#9776;search</span>
+    </div>
+</div>
+</nav>
+
+<div id="mySidenav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <div class="search-container" >
+    <!-- <p id="error"><font size="3" color="red">Start date should be greater than end date</p></font> -->
+    <br><font size="3" color="white">Start date:</br></font><input type="text" id="startDate" placeholder="Enter Start Date" value="yyyy/mm/dd"><i class="fa fa-calendar" style="color:white;font-size:25px"></i><br>
+    <br><font size="3" color="white">End date:</br></font><input type="text" id="endDate"  placeholder="Enter End Date" value="yyyy/mm/dd"><i class="fa fa-calendar" style="color:white;font-size:25px"></i></br>
+    <br><input type="text" id="location"  placeholder="Enter Location" value=""><i class="fa fa-plane" style="color:blue;font-size:25px"></i></br>
+    <br><input type="text" id="keyterm"  placeholder="Enter diseases" value=""><i class="fa fa-ambulance" style="color:red;font-size:25px"></i></br>
+    <br><button onclick="getInput()"><i class="fa fa-search">Search</button></i></br>
+    <br><p id="error1"><font size="3" color="red"></font></p>
+    <!-- <br><input type="button" value="Go to America" onclick="flyToAmerica()"></br> -->
+   </div>
+
+</div>
+
+<div class="box_and">
+    <center><font size="5" color="red"> Alerts and Watches</font></center>
+    <marquee height="100%" direction = "up" scrollamount="3" onmousedown="this.stop();" onmouseup="this.start();"><font size="4" color="white"><p id="result"></p></font></marquee>
+</div>
+
+<div class="butpos">
+  <button style="font-size:30px"><i class="fa fa-map-marker" onclick="flyToAmerica()"></i></button>
+</div>
+
+<script>
+function myFunction() {
+    alert("MapOutbreaks, a team of software developers at UNSW in 2019, is an online platform in utilizing online informal sources for disease outbreak monitoring and real-time surveillance of emerging public health threats. The freely available Web site deliver real-time intelligence on a broad range of emerging infectious diseases for a diverse audience including libraries, local health departments, governments, and international travelers. MapOutbreaks brings together disparate data sources, including online news aggregators and validated official reports, to achieve a unified and comprehensive view of the current global state of infectious diseases and their effect on human and animal health. Through an automated process, updating 24/7/365, the system monitors, organizes, integrates, filters, visualizes and disseminates online information about emerging diseases in nine languages, facilitating early detection of global public health threats.")
+}
+function myFunctionContactUs() {
+    alert("Send your queries to mapOutbreak@gmail.com");
+}
+function openForm() {
+  document.getElementById("myForm").style.display = "block";
+}
+function closeForm() {
+  document.getElementById("myForm").style.display = "none";
+}
+function myFunctionNews() {
+    var popup = document.getElementById("myPopup");
+    //newsAPI();
+    popup.classList.toggle("show");
+}
+function openNav() {
+  document.getElementById("mySidenav").style.width = "250px";
+  // document.getElementById("error1").innerHTML = "";
+}
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+  window.location.reload()
+  //document.getElementById("mySidenav").removeAttribute("input");
+  //initialize();
+}
+function locs(place){
+  place = (place + "").toLowerCase();
+  var locsAdd = {};
+  // Add keys to the hashmap
+  locsAdd['alabama'] = { long: 33, lat: -87 };
+  locsAdd['alaska'] = { long: 61, lat: -152 };
+  locsAdd['arizona'] = { long: 34, lat: -111 };
+  locsAdd['arkansas'] = { long: 35, lat: -92 };
+  locsAdd['california'] = { long: 36, lat: -120 };
+  locsAdd['colorado'] = { long: 39, lat: -105 };
+  locsAdd['connecticut'] = { long: 41, lat: -73 };
+  locsAdd['delaware'] = { long:39 , lat: -75};
+  locsAdd['district of columbia'] = { long:39 , lat: -77};
+  locsAdd['florida'] = { long: 28, lat: -81 };
+  locsAdd['georgia'] = { long:33 , lat: -83 };
+  locsAdd['hawaii'] = { long: 21, lat: -157};
+  locsAdd['idaho'] = { long: 44, lat: -114 };
+  locsAdd['illinois'] = { long:40 , lat: -89 };
+  locsAdd['indiana'] = { long:40 , lat: -86};
+  locsAdd['iowa'] = { long:42 , lat: -93 };
+  locsAdd['kansas'] = { long:38 , lat: -96 };
+  locsAdd['kentucky'] = { long: 37, lat: -84};
+  locsAdd['louisiana'] = { long: 31, lat: -91};
+  locsAdd['maine'] = { long: 44, lat: -69};
+  locsAdd['maryland'] = { long: 39, lat: -77 };
+  locsAdd['massachusetts'] = { long:42 , lat: -71 };
+  locsAdd['michigan'] = { long: 43, lat: -84 };
+  locsAdd['minnesota'] = { long: 45, lat: -84 };
+  locsAdd['mississippi'] = { long: 32, lat: -89 };
+  locsAdd['missouri'] = { long:38 , lat: -92 };
+  locsAdd['montana'] = { long: 47, lat: -110};
+  locsAdd['nebraska'] = { long: 41, lat: -98};
+  locsAdd['nevada'] = { long:38 , lat: -117};
+  locsAdd['new hampshire'] = { long: 43, lat: -71};
+  locsAdd['new jersey'] = { long: 40 , lat: -74};
+  locsAdd['new mexico'] = { long:35 , lat: -106};
+  locsAdd['new york'] = { long: 42.5, lat: -75.5 };
+  locsAdd['north carolina'] = { long: 35, lat: -80};
+  locsAdd['north dakota'] = { long:47 , lat: -100};
+  locsAdd['ohio'] = { long: 40, lat: -83};
+  locsAdd['oklahoma'] = { long: 35, lat: -97 };
+  locsAdd['oregon'] = { long: 44, lat:  -122};
+  locsAdd['pennsylvania'] = { long: 40, lat: -77 };
+  locsAdd['rhode island'] = { long: 41.5, lat: -71.5};
+  locsAdd['south carolina'] = { long: 34, lat: -81};
+  locsAdd['south dakota'] = { long: 44, lat: -99};
+  locsAdd['tennessee'] = { long: 36, lat: -87};
+  locsAdd['texas'] = { long: 31, lat: -97};
+  locsAdd['utah'] = { long: 40, lat: -112};
+  locsAdd['vermont'] = { long: 44, lat: -73};
+  locsAdd['virginia'] = { long: 38, lat: -78};
+  locsAdd['washington'] = { long:47 , lat: -121};
+  locsAdd['west virginia'] = { long: 38, lat: -81};
+  locsAdd['wisconsin'] = { long: 44, lat: -89};
+  locsAdd['wyoming'] = { long: 43, lat: -107};
+  var arr = []
+  if (place in locsAdd){     // modify cat key here
+    arr.push(locsAdd[place].long);
+    arr.push(locsAdd[place].lat);
+  }
+  return arr;
+}
+function getInput() {
+  document.getElementById("error1").innerHTML = "";
+  var x = document.getElementById("startDate").value;
+  var y = document.getElementById("endDate").value;
+  var z = document.getElementById("location").value;
+  var a = document.getElementById("keyterm").value;
+  //all parameters
+  if (x!="" && y!="" && a!="" && z!=""){
+      fetch('http://0.0.0.0:5000/show?start_date='+x+'&'+'end_date='+y+'&'+'location='+z+'&'+'keyterm='+a, {
+         method: 'GET',
+         dataType: 'json',
+         crossdomain: 'true',
+         headers: {
+             'Access-Control-Allow-Origin': 'http://127.0.0.1:12000',
+             'Access-Control-Allow-Methods': 'GET',
+             'Access-Control-Allow-Headers': 'Content-Type',
+             'Accept': 'application/json',
+             'Content-Type': 'application/json'
+         }
+      })
+      .then(function(response) {
+         if (!response.ok) {
+             var x =  Error(response.status);
+             //alert(x)
+             if (x == "Error: 404"){
+               document.getElementById('error1').innerHTML = "<font color='red'>"+"No result found.<br>Looks like everyone is healthy!" + "</font>"
+               //alert("No result found.")
+               return
+             }
+             else if (x == "Error: 400"){
+               document.getElementById('error1').innerHTML = "<font color='red'>"+"Incorrect input.<br>Check the fields and try again!"+ "</font>"
+               //alert("Incorrect input")
+               return
+             }
+         }
+         //else{
+         return response.json();
+       //  }
+       })
+      .then(function(data) {
+         //markLocations(data, earth)
+         //initialize2();
+         markLocationsRemove(locsARR);
+         markLocationsSearch(data, earth, z);
+         // var len = Object.keys(data).length;
+         // console.log(Object.keys(data).length);
+         // for (let i = 0; i<len; i++){
+         //   markLocations(data[i], earth);
+         //   //markLocationsRemove(data[i], earth);
+         //   //earth.setMap(null);
+         // }
+         // make list
+         //markLocationsSearch(data, earth, z);
+         // if (data.status != 404){
+         //   markLocationsRemove(locsARR);
+         //   markLocationsSearch(data.json(), earth, z);
+         // }
+         // else{
+         //   alert("ERROR404: No result found");
+         // }
+         //console.log(data)
+       //  document.getElementById('result').innerHTML = `${data.url}`;
+      })
+      //markLocationsSearch("data.location", earth)
+  }
+  //startdate enddate and location
+  else if (x!="" && y!="" && z!=""){
+     fetch('http://0.0.0.0:5000/show?start_date='+x+'&'+'end_date='+y+'&'+'location='+z, {
+     //fetch('https://cors-anywhere.herokuapp.com/http://0.0.0.0:5000/outbreaktable/show/2019-02-15T03:00:00/2019-02-25T03:00:00', {
+        method: 'GET',
+        dataType: 'json',
+        crossdomain: 'true',
+        headers: {
+            'Access-Control-Allow-Origin': 'http://127.0.0.1:12000',
+            'Access-Control-Allow-Methods': 'GET',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+     })
+     .then(function(response) {
+        if (!response.ok) {
+            var x =  Error(response.status);
+            //alert(x)
+            if (x == "Error: 404"){
+              document.getElementById('error1').innerHTML = "<font color='red'>"+"No result found.<br>Looks like everyone is healthy!" + "</font>"
+              //alert("No result found.")
+              return
+            }
+            else if (x == "Error: 400"){
+              document.getElementById('error1').innerHTML = "<font color='red'>"+"Incorrect input.<br>Check the fields and try again!"+ "</font>"
+              //alert("Incorrect input")
+              return
+            }
+        }
+        //else{
+        return response.json();
+      //  }
+      })
+     //.then((resp) => resp.json())
+     .then(function(data) {
+        //markLocations(data, earth)
+        //initialize2();
+        markLocationsRemove(locsARR);
+        markLocationsSearch(data, earth, z);
+        // if (data.status != 404){
+        //   markLocationsRemove(locsARR);
+        //   markLocationsSearch(data.json(), earth, z);
+        // }
+        // else{
+        //   alert("ERROR404: No result found");
+        // }
+        //console.log(data)
+      //  document.getElementById('result').innerHTML = `${data.url}`;
+     })
+    // markLocations(data, earth)
+  }
+  //startdate enddate and keywords
+  else if (x!="" && y!="" && a!=""){
+     fetch('http://0.0.0.0:5000/show?start_date='+x+'&'+'end_date='+y+'&'+'keyterm='+a, {
+     //fetch('https://cors-anywhere.herokuapp.com/http://0.0.0.0:5000/outbreaktable/show/2019-02-15T03:00:00/2019-02-25T03:00:00', {
+        method: 'GET',
+        dataType: 'json',
+        crossdomain: 'true',
+        headers: {
+            'Access-Control-Allow-Origin': 'http://127.0.0.1:12000',
+            'Access-Control-Allow-Methods': 'GET',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+     })
+     .then(function(response) {
+        if (!response.ok) {
+            var x =  Error(response.status);
+            //alert(x)
+            if (x == "Error: 404"){
+              document.getElementById('error1').innerHTML = "<font color='red'>"+"No result found.<br>Looks like everyone is healthy!" + "</font>"
+              //alert("No result found.")
+              return
+            }
+            else if (x == "Error: 400"){
+              document.getElementById('error1').innerHTML = "<font color='red'>"+"Incorrect input.<br>Check the fields and try again!"+ "</font>"
+              //alert("Incorrect input")
+              return
+            }
+        }
+        //else{
+        return response.json();
+      //  }
+      })
+      .then(function(data) {
+        //markLocations(data, earth)
+        //initialize2();
+        if(data == null){
+          return
+        }
+        //console.log(data)
+        markLocationsRemove(locsARR);
+        var len = Object.keys(data).length;
+        console.log(Object.keys(data).length);
+        for (let i = 0; i<len; i++){
+          markLocations(data[i], earth);
+          //markLocationsRemove(data[i], earth);
+          //earth.setMap(null);
+        }
+        //markLocations(data, earth)
+        //markLocationsSearch(data, earth, z);
+        // if (data.status != 404){
+        //   markLocationsRemove(locsARR);
+        //   markLocationsSearch(data.json(), earth, z);
+        // }
+        // else{
+        //   alert("ERROR404: No result found");
+        // }
+        //console.log(data)
+      //  document.getElementById('result').innerHTML = `${data.url}`;
+     })
+     //markLocationsSearch("data.location", earth)
+  }
+  //startdate and enddate
+  else if (x!="" && y!=""){
+    var url = 'http://0.0.0.0:5000/show?start_date='+x+'&'+'end_date='+y
+    fetch(url, {
+    //fetch('https://cors-anywhere.herokuapp.com/http://0.0.0.0:5000/outbreaktable/show/2019-02-15T03:00:00/2019-02-25T03:00:00', {
+        method: 'GET',
+        dataType: 'json',
+        crossdomain: 'true',
+        headers: {
+            'Access-Control-Allow-Origin': 'http://127.0.0.1:12000',
+            'Access-Control-Allow-Methods': 'GET',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function(response) {
+       if (!response.ok) {
+           var x =  Error(response.status);
+           //alert(x)
+           if (x == "Error: 404"){
+             document.getElementById('error1').innerHTML = "<font color='red'>"+"No result found.<br>Looks like everyone is healthy!" + "</font>"
+             //alert("No result found.")
+             return
+           }
+           else if (x == "Error: 400"){
+             document.getElementById('error1').innerHTML = "<font color='red'>"+"Incorrect input.<br>Check the fields and try again!"+ "</font>"
+             //alert("Incorrect input")
+             return
+           }
+       }
+       //else{
+       return response.json();
+     //  }
+   })
+    .then(function(data) {
+       //markLocations(data, earth)
+       //initialize2();
+       markLocationsRemove(locsARR);
+       var len = Object.keys(data).length;
+       console.log(Object.keys(data).length);
+       for (let i = 0; i<len; i++){
+         markLocations(data[i], earth);
+         //markLocationsRemove(data[i], earth);
+         //earth.setMap(null);
+       }
+       //markLocations(data, earth);
+       // if (data.status != 404){
+       //   markLocationsRemove(locsARR);
+       //   markLocations(data, earth)
+       //
+       // }
+       // else{
+       //   alert("ERROR404: No result found");
+       // }
+       //console.log(data)
+     //  document.getElementById('result').innerHTML = `${data.url}`;
+    })
+     //markLocations("data.location", earth)
+  }
+}
+window.locsARR = [];
+
+function markLocations(data, earth){
+  if(data.reports[0].reported_events[0].location == ""){
+    return
+  }
+  var tempData = data.reports[0].reported_events[0].location
+  console.log(tempData)
+  var locsArr = tempData.split(", ");
+  for (let i = 0; i < locsArr.length; i++){
+      console.log(locsArr[i])
+      var arr = locs(locsArr[i])
+      var marker = WE.marker([arr[0], arr[1]]).addTo(earth);
+      var repSub = ""
+      for(let i = 0; i < data.reports[0].reported_events.length; i++){
+        if(data.reports[0].reported_events[i].type == "infected"){
+            repSub = "<br>"+"<em>"+"Reported cases: "+"</em>"+data.reports[0].reported_events[i].number_affected
+        }
+      }
+      var hosSub = ""
+      for(let i = 0; i < data.reports[0].reported_events.length; i++){
+        if(data.reports[0].reported_events[i].type == "hospitalised"){
+            hosSub = "<br>"+"<em>"+"Hospitalised cases: "+"</em>"+data.reports[0].reported_events[i].number_affected
+        }
+      }
+      var deadSub = ""
+      for(let i = 0; i < data.reports[0].reported_events.length; i++){
+        if(data.reports[0].reported_events[i].type == "death"){
+            deadSub = "<br>"+"<em>"+"Dead: "+"</em>"+data.reports[0].reported_events[i].number_affected
+        }
+      }
+
+      var subStr = repSub+hosSub+deadSub
+      var str = "<strong><u>"+data.headline+"</strong></u>"+"<br>"+data.date_of_publication+"<i>"+"<br>"+data.main_text+"</i>"+subStr+"<br>"+"<a href= "+data.url+">"+"find out more"+"</a>"+"<br>"
+
+
+      marker.bindPopup(str, {maxWidth: 500, maxHeight: 2000, closeButton: true});
+           //var markerCustom = WE.marker([0, 0], '/img/logo-webglearth-white-100.png', 100, 24).addTo(earth);
+           //marker.removeFrom(earth)
+           //locsARR.push(marker);
+           //WE.marker([arr[0], arr[1]]).removeFrom(earth);
+      locsARR.push(marker);
+  }
+  // console.log(locsARR.length)
+  //marker.removeFrom(earth)
+  //marker.setMap(null);
+}
+function markLocationsRemove(locsAR){
+  for (i = 0; i<locsAR.length; i++){
+    locsAR[i].removeFrom(earth);
+  }
+}
+function markLocationsSearch(data, earth, place){
+    var arr = locs(place)
+    if(arr == []){
+      return
+    }
+    //console.log(data)
+    if(data[0].reports[0].reported_events[0].location == ""){
+      return
+    }
+    var marker = WE.marker([arr[0], arr[1]]).addTo(earth);
+    // var polygon = WE.polygon([[arr[0]-0.15, arr[1]], [arr[0], arr[1]-0.15], [arr[0]-0.15, arr[1]-0.15]], {
+    //   opacity: 1,
+    //   fillOpacity: 0.3,
+    //   weight: 5
+    // }).addTo(earth);
+    var repSub = ""
+    for(let i = 0; i < data[0].reports[0].reported_events.length; i++){
+      if(data[0].reports[0].reported_events[i].type == "infected"){
+          repSub = "<br>"+"<em>"+"Reported cases: "+"</em>"+data[0].reports[0].reported_events[i].number_affected
+      }
+    }
+    var hosSub = ""
+    for(let i = 0; i < data[0].reports[0].reported_events.length; i++){
+      if(data[0].reports[0].reported_events[i].type == "hospitalised"){
+          hosSub = "<br>"+"<em>"+"Hospitalised cases: "+"</em>"+data[0].reports[0].reported_events[i].number_affected
+      }
+    }
+    var deadSub = ""
+    for(let i = 0; i < data[0].reports[0].reported_events.length; i++){
+      if(data[0].reports[0].reported_events[i].type == "death"){
+          deadSub = "<br>"+"<em>"+"Dead: "+"</em>"+data[0].reports[0].reported_events[i].number_affected
+      }
+    }
+    var subStr = repSub+hosSub+deadSub
+    var str = "<strong><u><font size='2' color='blue'>"+data[0].headline+"</strong></u></font>"+"<br>"+data[0].date_of_publication+"<i>"+"<br>"+data[0].main_text+"</i>"+subStr+"<br>"+"<a href= "+data[0].url+">"+"find out more"+"</a>"+"<br>"
+    marker.bindPopup(str, {maxWidth: 500, maxHeight: 2000,  closeButton: true}).openPopup();
+    panTo(arr);
+    // var subStr = "<br>"+"<em>"+"Reported cases: "+"</em>"+data[0].reports[0].reported_events+"<br>"+"<em>"+"Hospitalised cases: "+"</em>"+data[0].reports[0].hospitalised+"<br>"+"<em>"+"Deaths: "+"</em>"+data[0].reports[0].deaths+"<br>"//+"<em>"+"Locations affected: "+"</em>"+data[0].reports[0].locations
+    // var str = "<strong><u><font size='2' color='blue'>"+data[0].headline+"</strong></u></font>"+"<br>"+data[0].date_of_publication+"<i>"+"<br>"+data[0].main_text+"</i>"+subStr+"<br>"+"<a href= "+data[0].url+">"+"Find out more about the outbreak"+"</a>"+"<br>"
+    marker.bindPopup(str, {maxWidth: 500, maxHeight: 2000,  closeButton: true}).openPopup();
+    //var markerCustom = WE.marker([arr[0], arr[1]], '/img/logo-webglearth-white-100.png', 100, 24).addTo(earth);
+    panTo(arr);
+}
+function newsAPI(){
+  fetch('https://cors-anywhere.herokuapp.com/https://newsapi.org/v2/everything?q=health AND outbreak&language=en&apiKey=84ceb92e06b44f1db554d716c0fa0a01', {
+  // //fetch('https://cors-anywhere.herokuapp.com/http://0.0.0.0:5000/outbreaktable/show/2019-02-15T03:00:00/2019-02-25T03:00:00', {
+      method: 'GET',
+      dataType: 'json',
+      crossdomain: 'true',
+      headers: {
+          'Access-Control-Allow-Origin': 'http://127.0.0.1:12000',
+          'Access-Control-Allow-Methods': 'GET',
+          // 'Access-Control-Allow-Methods': 'GET',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          //  'Access-Control-Allow-Origin': '*',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+      }
+  })
+  .then((resp) => resp.json())
+  .then(function(data) {
+      //console.log(data)
+      var element = document.getElementById("result");
+      // document.getElementById('result').innerHTML = `${data.articles[i].title}`;
+      for(i=0; i<20 ; i++){
+        console.log(data.articles[i].title)
+        var a = document.createElement('a');
+        //a.title
+        var node = document.createTextNode(""+ data.articles[i].title);
+        a.appendChild(node);
+        a.href = ""+data.articles[i].url
+        element.appendChild(a);
+        var br1 = document.createElement("br");
+        element.appendChild(br1);
+        var br2 = document.createElement("br");
+        element.appendChild(br2);
+      }
+  })
+}
+
+function locsCountries(place){
+
+    locsAdd['andorra'] = { long:1.601554 , lat: 42.546245};
+    locsAdd['united arab emirates'] = { long:53.847818 , lat: 23.424076};
+    locsAdd['afghanistan'] = { long:67.709953 , lat: 33.93911};
+    locsAdd['antigua and barbuda'] = { long: -61.796428 , lat: 17.060816};
+    locsAdd['aguilla'] = {long:-63.068615 , lat:18.220554};
+    locsAdd['albania'] = {long:20.168331 , lat:41.153332};
+    locsAdd['armenia'] = {long:45.038189 , lat:40.069099};
+    locsAdd['netherlands Antilles'] = {long:-69.060087 , lat:12.226079};
+    locsAdd['angola'] = {long:17.873887 , lat:-11.202692};
+    locsAdd['antarctica'] = {long:-0.071389 , lat:-75.250973};
+    locsAdd['argentina'] = {long:-63.616672 , lat:-38.416097};
+    locsAdd['american Samoa'] = {long:-170.132217 , lat:-14.270972};
+    locsAdd['austria'] = {long:14.550072 , lat:47.516231};
+    locsAdd['australia'] = {long:133.775136 , lat:-25.274398};
+    locsAdd['aruba'] = {long:-69.968338 , lat:12.52111};
+    locsAdd['azerbaijan'] = {long:47.576927 , lat:40.143105};
+    locsAdd['bosnia and Herzegovina'] = {long:17.679076 , lat:43.915886};
+    locsAdd['barbados'] = {long:-59.543198 , lat:13.193887};
+    locsAdd['bangladesh'] = {long:90.356331 , lat:23.684994};
+    locsAdd['belgium'] = { long:4.469936 , lat: 50.503887};
+    locsAdd['burkina Faso'] = { long:-1.561593 , lat:12.238333};
+    locsAdd['bulgaria'] = {long:25.48583 , lat:42.733883};
+    locsAdd['bahrain'] = {long:50.637772 , lat:25.930414};
+    locsAdd['burundi'] = {long:29.918886 , lat:-3.373056};
+    locsAdd['benin'] = {long:2.315834 , lat:9.30769};
+    locsAdd['bermuda'] = {long:-64.75737 , lat:32.321384};
+    locsAdd['brunei'] = {long:114.727669 , lat:4.535277};
+    locsAdd['bolivia'] = {long:-63.588653 , lat:-16.290154};
+    locsAdd['brazil'] = {long:-51.92528 , lat:-14.235004};
+    locsAdd['bahamas'] = {long:-77.39628 , lat:25.03428};
+    locsAdd['bhutan'] = {long:90.433601 , lat:27.514162};
+    locsAdd['bouvet island'] = {long:3.413194 , lat:-54.423199};
+    locsAdd['botswana'] = {long:24.684866 , lat:-22.328474};
+    locsAdd['belarus'] = {long:27.953389 , lat:	53.709807};
+    locsAdd['belize'] = {long:-88.49765 , lat:17.189877};
+    locsAdd['canada'] = {long:-106.346771 , lat:56.130366};
+    locsAdd['cocos [Keeling] islands'] = {long:96.870956 , lat:-12.164165};
+    locsAdd['congo'] = {long:21.758664 , lat:-4.038333};
+    locsAdd['central african republic'] = {long:20.939444 , lat:6.611111};
+    locsAdd['congo [republic]'] = {long:15.827659 , lat:-0.228021};
+    locsAdd['switzerland'] = {long:8.227512 , lat:46.818188};
+    locsAdd["côte d'Ivoire"] = {long:-5.54708 , lat:7.539989};
+    locsAdd['cook islands'] = {long:-159.777671 , lat:-21.236736};
+    locsAdd['chile'] = {long:-71.542969 , lat:-35.675147};
+    locsAdd['cameroon'] = {long:12.354722 , lat:7.369722};
+    locsAdd['china'] = {long:104.195397 , lat:35.86166};
+    locsAdd['colombia'] = {long:-74.297333 , lat:4.570868};
+    locsAdd['costa rica'] = {long:-83.753428 , lat:9.748917};
+    locsAdd['cuba'] = {long:-77.781167 , lat:21.521757};
+    locsAdd['cape verde'] = {long:-24.013197 , lat:16.002082};
+    locsAdd['christmas island'] = {long:105.690449 , lat:-10.447525};
+    locsAdd['cyprus'] = {long:33.429859 , lat:35.126413};
+    locsAdd['czech republic'] = {long:15.472962 , lat:49.817492};
+    locsAdd['germany'] = {long:10.451526 , lat:51.165691};
+    locsAdd['djibouti'] = {long:42.590275 , lat:11.825138};
+    locsAdd['denmark'] = {long:9.501785 , lat:56.26392};
+    locsAdd['dominica'] = {long:-61.370976 , lat:15.414999};
+    locsAdd['dominican republic'] = {long:-70.162651 , lat:18.735693};
+    locsAdd['algeria'] = {long:1.659626 , lat:28.033886};
+    locsAdd['ecuador'] = {long:-78.183406 , lat:-1.831239};
+    locsAdd['estonia'] = {long:25.013607 , lat:58.595272};
+    locsAdd['egypt'] = {long:30.802498 , lat:26.820553};
+    locsAdd['western sahara'] = {long:30.802498 , lat:24.215527};
+    locsAdd['eritrea'] = {long:39.782334 , lat:15.179384};
+    locsAdd['spain'] = {long:-3.74922 , lat:40.463667};
+    locsAdd['ethiopia'] = {long:40.489673 , lat:9.145};
+    locsAdd['finland'] = {long:25.748151 , lat:61.92411};
+    locsAdd['fiji'] = {long:179.414413 , lat:-16.578193};
+    locsAdd['falkland islands [Islas Malvinas]'] = {long:-59.523613 , lat:-51.796253};
+    locsAdd['micronesia'] = {long:150.550812 , lat:7.425554};
+    locsAdd['faroe islands'] = {long:-6.911806 , lat:61.892635};
+    locsAdd['france'] = {long:2.213749 , lat:46.227638};
+    locsAdd['gabon'] = {long:11.609444 , lat:-0.803689};
+    locsAdd['united kingdom'] = {long:-3.435973 , lat:55.378051};
+    locsAdd['grenada'] = {long:-61.604171 , lat:12.262776};
+    locsAdd['georgia'] = {long:43.356892 , lat:42.315407};
+    locsAdd['french guiana'] = {long:-53.125782 , lat:3.933889};
+    locsAdd['guernsey'] = {long:-2.585278 , lat:49.465691};
+    locsAdd['ghana'] = {long:-1.023194 , lat:7.946527};
+    locsAdd['gibraltar'] = {long:-5.345374 , lat:36.137741};
+    locsAdd['greenland'] = {long:-42.604303 , lat:71.706936};
+    locsAdd['gambia'] = {long:-15.310139 , lat:13.443182};
+    locsAdd['guinea'] = {long:-9.696645 , lat:9.945587};
+    locsAdd['guadeloupe'] = {long:-62.067641 , lat:16.995971};
+    locsAdd['equatorial guinea'] = {long:10.267895 , lat:1.650801};
+    locsAdd['greece'] = {long:21.824312 , lat:39.074208};
+    locsAdd['south georgia and the south sandwich islands'] = {long:-36.587909 , lat:-54.429579};
+    locsAdd['guatemala'] = {long:-90.230759 , lat:15.783471};
+    locsAdd['guam'] = {long:144.793731 , lat:13.444304};
+    locsAdd['guinea-bissau'] = {long:-15.180413 , lat:11.803749};
+    locsAdd['guyana'] = {long:-58.93018 , lat:4.860416};
+    locsAdd['gaza strip'] = {long:34.308825 , lat:31.354676};
+    locsAdd['hong kong'] = {long:114.109497 , lat:22.396428};
+    locsAdd['heard island and mcDonald islands'] = {long:73.504158 , lat:-53.08181};
+    locsAdd['honduras'] = {long:-86.241905 , lat:15.199999};
+    locsAdd['croatia'] = {long:15.2 , lat:45.1};
+    locsAdd['haiti'] = {long:-72.285215 , lat:18.971187};
+    locsAdd['hungary'] = {long:19.503304 , lat:47.162494};
+    locsAdd['indonesia'] = {long:113.921327 , lat:-0.789275};
+    locsAdd['ireland'] = {long:-8.24389 , lat:53.41291};
+    locsAdd['israel'] = {long:34.851612 , lat:31.046051};
+    locsAdd['india'] = {long: 78.96288, lat: 20.593684};
+    locsAdd['iraq'] = {long: 43.679291, lat: 33.223191};
+    locsAdd['iran'] = {long: 53.688046, lat: 32.427908};
+    locsAdd['iceland'] = {long: -19.020835, lat: 64.963051};
+    locsAdd['italy'] = {long: 12.56738, lat: 41.87194};
+    locsAdd['jersey'] = {long: -2.13125, lat: 49.214439};
+    locsAdd['jamaica'] = {long: -77.297508, lat: 18.109581};
+    locsAdd['jordan'] = {long: 36.238414, lat: 30.585164};
+    locsAdd['japan'] = {long: 138.252924, lat: 36.204824};
+    locsAdd['kenya'] = {long: 37.906193, lat: -0.023559};
+    locsAdd['kyrgyzstan'] = {long: 74.766098, lat: 41.20438};
+    locsAdd['cambodia'] = {long: 104.990963, lat: 12.565679};
+    locsAdd['kiribati'] = {long: -168.734039, lat: -3.370417};
+    locsAdd['comoros'] = {long: 43.872219, lat: -11.875001};
+    locsAdd['north korea'] = {long: 127.510093, lat: 40.339852};
+    locsAdd['south korea'] = {long: 127.766922, lat: 35.907757};
+    locsAdd['kuwait'] = {long: 47.481766, lat: 29.31166};
+    locsAdd['kazakhstan'] = {long: 66.923684, lat: 48.019573};
+    locsAdd['laos'] = {long: 102.495496, lat: 19.85627};
+    locsAdd['lebanon'] = {long: 35.862285, lat: 33.854721};
+    locsAdd['saint lucia'] = {long: -60.978893, lat: 13.909444};
+    locsAdd['liechtenstein'] = {long: 9.555373, lat: 47.166};
+    locsAdd['sri lanka'] = {long: 80.771797, lat: 7.873054};
+    locsAdd['liberia'] = {long: -9.429499, lat: 6.428055};
+    locsAdd['morocco'] = {long: -7.09262, lat: 31.791702};
+    locsAdd['madagascar'] = {long: 46.869107, lat: -18.766947};
+    locsAdd['mali'] = {long: -3.996166, lat: 17.570692};
+    locsAdd['myanmar'] = {long: 95.956223, lat: 21.913965};
+    locsAdd['mongolia'] = {long: 103.846656, lat: 46.862496};
+    locsAdd['macau'] = {long: 113.543873, lat: 22.198745};
+    locsAdd['mexico'] = {long: -102.552784, lat: 23.634501};
+    locsAdd['malaysia'] = {long: 101.975766, lat: 4.210484};
+    locsAdd['namibia'] = {long: 18.49041, lat: -22.95764};
+    locsAdd['niger'] = {long: 8.081666, lat: 17.607789};
+    locsAdd['nigeria'] = {long: 8.675277, lat: 9.081999};
+    locsAdd['nicaragua'] = {long: -85.207229, lat: 12.865416};
+    locsAdd['netherlands'] = {long: 5.291266, lat: 52.132633};
+    locsAdd['norway'] = {long: 8.468946, lat: 60.472024};
+    locsAdd['nepal'] = {long: 84.124008, lat: 28.394857};
+    locsAdd['nauru'] = {long: 166.931503, lat: -0.522778};
+    locsAdd['new zealand'] = {long: 174.885971, lat: -40.900557};
+    locsAdd['oman'] = {long: 55.923255, lat: 21.512583};
+    locsAdd['panama'] = {long: -80.782127, lat: 8.537981};
+    locsAdd['peru'] = {long: -75.015152, lat: -9.189967};
+    locsAdd['philippines'] = {long: 121.774017, lat: 12.879721};
+    locsAdd['pakistan'] = {long: 69.345116, lat: 30.375321};
+    locsAdd['poland'] = {long: 19.145136, lat: 51.919438};
+    locsAdd['puerto rico'] = {long: -66.590149, lat: 18.220833};
+    locsAdd['portugal'] = {long: -8.224454, lat: 39.399872};
+    locsAdd['qatar'] = {long: 51.183884, lat: 25.354826};
+    locsAdd['russia'] = {long: 105.318756, lat: 61.52401};
+    locsAdd['rwanda'] = {long: 29.873888, lat: -1.940278};
+    locsAdd['saudi arabia'] = {long: 45.079162, lat: 23.885942};
+    locsAdd['sudan'] = {long: 30.217636, lat: 12.862807};
+    locsAdd['sweden'] = {long: 60.128161, lat: 60.128161};
+    locsAdd['singapore'] = {long: 1.352083, lat: 1.352083};
+    locsAdd['Somalia'] = {long: 46.199616, lat: 5.152149};
+    locsAdd['Syria'] = {long: 38.996815, lat: 34.802075};
+    locsAdd['Chad'] = {long: 18.732207, lat: 15.454166};
+    locsAdd['Thailand'] = {long: 100.992541, lat: 15.870032};
+    locsAdd['Turkmenistan'] = {long: 59.556278, lat: 38.969719};
+    locsAdd['Tunisia'] = {long: 9.537499, lat: 33.886917};
+    locsAdd['Turkey'] = {long: 35.243322, lat: 38.963745};
+    locsAdd['Taiwan'] = {long: 120.960515, lat: 23.69781};
+    locsAdd['Tanzania'] = {long: 34.888822, lat: -6.369028};
+    locsAdd['Ukraine'] = {long: 31.16558, lat: 48.379433};
+    locsAdd['Uganda'] = {long: 32.290275, lat: 1.373333};
+    locsAdd['United States'] = {long: -95.712891, lat: 37.09024};
+    locsAdd['Uruguay'] = {long: -55.765835, lat: -32.522779};
+    locsAdd['Uzbekistan'] = {long: 64.585262, lat: 41.377491};
+    locsAdd['Venezuela'] = {long: -66.58973, lat: 6.42375};
+    locsAdd['Vietnam'] = {long: 108.277199, lat: 14.058324};
+    locsAdd['Samoa'] = {long: -172.104629, lat: -13.759029};
+    locsAdd['Yemen'] = {long: 48.516388, lat: 15.552727};
+    locsAdd['South Africa'] = {long: 22.937506, lat: -30.559482};
+    locsAdd['Zambia'] = {long: 27.849332, lat: -13.133897};
+    locsAdd['Zimbabwe'] = {long: 29.154857, lat: -19.015438};
+}
+
+
+
+</script>
+</body>
+</html>
