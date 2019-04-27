@@ -161,6 +161,7 @@ body, html {
   border: 2px solid white;
 }
 .navbar {
+    /* margin-top: 30px; */
     margin-bottom: 0;
     border-radius: 0;
     background-color: Steelblue;
@@ -183,6 +184,57 @@ body, html {
   margin-left: 75px;
   font-size: 30px;
 }
+.tabs {
+    position:relative;
+    min-height:200px;
+    clear:both;
+    margin:25px 0;
+}
+.tab {
+    float:left;
+    display: none;
+}
+.tab:first-of-type {
+    display: inline-block;
+}
+.tabs-link {
+    position: relative;
+    top: -14px;
+    height: 20px;
+    left: -40px;
+}
+.tab-link {
+    background:#eee;
+    display: inline-block;
+    padding:10px;
+    border:1px solid #ccc;
+    margin-left:-1px;
+    position:relative;
+    list-style-type: none;
+    left:1px;
+    top:1px;
+    cursor:pointer;
+}
+.tab-link {
+    background:#f8f8f8;
+}
+.content-popup {
+    background:white;
+    position:absolute;
+    width: 500px;
+    height: 90%;
+    top:48px;
+    /* left:0;
+    right:0;
+    bottom:0; */
+    padding:20px;
+    border:1px solid #ccc;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+.tab:target {
+    display: block;
+}
 </style>
 
 <head>
@@ -195,6 +247,7 @@ body, html {
        foo: 'bar', attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
       }).addTo(earth);
      newsAPI();
+     //eventsAPI();
      earth.setView([31.968599, -99.901810], 3);
     }
     //fly to different places
@@ -243,7 +296,7 @@ body, html {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#"><font size="4" color="white">MapOutbreaks</a></font>
+            <a class="navbar-brand" href="#"><font size="4" color="white">Travelolo</a></font>
         </div>
     <div class="collapse navbar-collapse" id="myNavbar" background-color="Steelblue">
         <ul class="nav navbar-nav" background-color="Steelblue">
@@ -316,10 +369,6 @@ window.onclick = function(event) {
     <br><p id="error1"><font size="3" color="red"></font></p>
    </div>
 
-</div>
-
-<div class="yup">
-  <p><font size="3" color="yellow">Click on the pins to know more about the outbreak.</p></font>
 </div>
 
 <div class="box_and">
@@ -581,8 +630,11 @@ function getInput() {
            })
           .then(function(data) {
              //console.log(data)
+             //eventsAPI(z);
+             // console.log(data_event);
              markLocationsRemove(locsARR);
              markCountrySearch(data, earth, z);
+
           })
         }
     }
@@ -596,8 +648,13 @@ function markLocationsRemove(locsAR){
   }
 }
 function markCountrySearch(data, earth, place){
+
+  // var evSub = "<font size='4' color='red'><strong>Events in "+place+"</strong></font><br>"
+  // var str1 = evSub  + "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[0].name.text+"</strong></u></font>"+"<br>"+data_event.events[0].description+"<br>"+"<a href= "+data_event.events[0].url+">"+"find out more"+"</a>"+"<br>"
+  // var limiter1 = 0;
+  //console.log("DUHH"+data_event);
   var arr = locsCountry(place);
-  var locSub = "<font size='4' color='red'><strong>"+place+"</strong></font><br>"
+  var locSub = "<font size='4' color='red'><strong>Outbreaks in "+place+"</strong></font><br>"
   if(arr == []){
     return
   }
@@ -606,16 +663,58 @@ function markCountrySearch(data, earth, place){
   //console.log(data.articles.length)
   var limiter = 0;
   for(i=1; i<data.articles.length; i++){
-    if (limiter < 2){
+    if (limiter < 20){
       var str2 = "<br>"+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[i].title+"</strong></u></font>"+"<br>"+data.articles[i].description+"<br>"+"<a href= "+data.articles[i].url+">"+"find out more"+"</a>"+"<br>"
       str = str+str2
       limiter = limiter+1;
     }
   }
+
+  // str = str + "<br><font size='4' color='red'><strong> Outbreaks in "+place+"</strong></font><br>"
+  // str = str + "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[0].title+"</strong></u></font>"+"<br>"+data.articles[0].description+"<br>"+"<a href= "+data.articles[0].url+">"+"find out more"+"</a>"+"<br>"
+  // //console.log(data.articles.length)
+  // limiter = 0;
+  // for(i=1; i<data.articles.length; i++){
+  //   if (limiter < 2){
+  //     var str2 = "<br>"+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[i].title+"</strong></u></font>"+"<br>"+data.articles[i].description+"<br>"+"<a href= "+data.articles[i].url+">"+"find out more"+"</a>"+"<br>"
+  //     str = str+str2
+  //     limiter = limiter+1;
+  //   }
+  // }
+
+  var content = '<div class="tabs">' +
+
+            '<div class="tab" id="tab-1">' +
+            '<div class="content-popup">' +
+            '<b>aaaa</b>' +
+            '</div>' +
+            '</div>' +
+
+            '<div class="tab" id="tab-2">' +
+            '<div class="content-popup">' +
+            '<b>'+str+'</b>' +
+            '</div>' +
+            '</div>' +
+
+            '<div class="tab" id="tab-3">' +
+            '<div class="content-popup">' +
+            '<b>Tab 3 content</b>' +
+            '</div>' +
+            '</div>' +
+
+            '<ul class="tabs-link">' +
+            '<li class="tab-link"> <a href="#tab-1"><span>Tab 1</span></a></li>' +
+            '<li class="tab-link"> <a href="#tab-2"><span>Tab 2</span></a></li>' +
+            '<li class="tab-link"> <a href="#tab-3"><span>Tab 3</span></a></li>' +
+            '</ul>' +
+        '</div>';
   //var str2 = "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[1].title+"</strong></u></font>"+"<br>"+data.articles[1].description+"<br>"+"<a href= "+data.articles[1].url+">"+"find out more"+"</a>"+"<br>"
-  marker.bindPopup(str, {maxWidth: 500, maxHeight: 2000,  closeButton: true}).openPopup();
+  marker.bindPopup(content, {maxWidth: 500, maxHeight: 2000,  closeButton: true}).openPopup();
   panTo(arr);
   locsARR.push(marker);
+
+
+
 }
 
 
@@ -646,6 +745,22 @@ function newsAPI(){
         var br2 = document.createElement("br");
         element.appendChild(br2);
       }
+  })
+}
+
+
+function eventsAPI(country){
+    console.log("LOCATION: ",country)
+    url = "https://www.eventbriteapi.com/v3/events/search/?token=OSUIDAF6IGFCANDO4ZDG&location.address="+country.toLowerCase()+"&location.within=10km&expand=venue";
+    console.log(url);
+  fetch(url, {
+      method: 'GET',
+      dataType: 'json'
+  })
+  .then((resp) => resp.json())
+  .then(function(data_event) {
+      console.log(data_event);
+      //data_event;
   })
 }
 
