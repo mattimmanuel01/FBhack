@@ -629,12 +629,9 @@ function getInput() {
              return response.json();
            })
           .then(function(data) {
-             //console.log(data)
-             eventsAPI(z, console.log);
-             // console.log(data_event);
              markLocationsRemove(locsARR);
-             markCountrySearch(data, earth, z);
-             //eventsAPI(z);
+             eventsAPI(z, data, earth, cb);
+
           })
         }
     }
@@ -647,72 +644,74 @@ function markLocationsRemove(locsAR){
     locsAR[i].removeFrom(earth);
   }
 }
-function markCountrySearch(data, earth, place){
 
 
+function cb(data, data_event, place, earth) {
 
-  var arr = locsCountry(place);
-  var locSub = "<font size='4' color='red'><strong>Outbreaks in "+place+"</strong></font><br>"
-  if(arr == []){
-    return
-  }
-  var marker = WE.marker([arr[0], arr[1]]).addTo(earth);
-  var str = locSub+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[0].title+"</strong></u></font>"+"<br>"+data.articles[0].description+"<br>"+"<a href= "+data.articles[0].url+">"+"find out more"+"</a>"+"<br>"
-  //console.log(data.articles.length)
-  var limiter = 0;
-  for(i=1; i<data.articles.length; i++){
-    if (limiter < 20){
-      var str2 = "<br>"+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[i].title+"</strong></u></font>"+"<br>"+data.articles[i].description+"<br>"+"<a href= "+data.articles[i].url+">"+"find out more"+"</a>"+"<br>"
-      str = str+str2
-      limiter = limiter+1;
+
+    var arr = locsCountry(place);
+    var locSub = "<font size='4' color='red'><strong>Outbreaks in "+place+"</strong></font><br>"
+    if(arr == []){
+      return
     }
-  }
-
-  // str = str + "<br><font size='4' color='red'><strong> Outbreaks in "+place+"</strong></font><br>"
-  // str = str + "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[0].title+"</strong></u></font>"+"<br>"+data.articles[0].description+"<br>"+"<a href= "+data.articles[0].url+">"+"find out more"+"</a>"+"<br>"
-  // //console.log(data.articles.length)
-  // limiter = 0;
-  // for(i=1; i<data.articles.length; i++){
-  //   if (limiter < 2){
-  //     var str2 = "<br>"+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[i].title+"</strong></u></font>"+"<br>"+data.articles[i].description+"<br>"+"<a href= "+data.articles[i].url+">"+"find out more"+"</a>"+"<br>"
-  //     str = str+str2
-  //     limiter = limiter+1;
-  //   }
-  // }
-
-  var content = '<div class="tabs">' +
-
-            '<div class="tab" id="tab-1">' +
-            '<div class="content-popup">' +
-            '<b id="text1"></b>' +
-            '</div>' +
-            '</div>' +
-
-            '<div class="tab" id="tab-2">' +
-            '<div class="content-popup">' +
-            '<b>'+str+'</b>' +
-            '</div>' +
-            '</div>' +
-
-            '<div class="tab" id="tab-3">' +
-            '<div class="content-popup">' +
-            '<b>Tab 3 content</b>' +
-            '</div>' +
-            '</div>' +
-
-            '<ul class="tabs-link">' +
-            '<li class="tab-link"> <a href="#tab-1"><span>Tab 1</span></a></li>' +
-            '<li class="tab-link"> <a href="#tab-2"><span>Tab 2</span></a></li>' +
-            '<li class="tab-link"> <a href="#tab-3"><span>Tab 3</span></a></li>' +
-            '</ul>' +
-        '</div>';
-  //var str2 = "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[1].title+"</strong></u></font>"+"<br>"+data.articles[1].description+"<br>"+"<a href= "+data.articles[1].url+">"+"find out more"+"</a>"+"<br>"
-  marker.bindPopup(content, {maxWidth: 500, maxHeight: 2000,  closeButton: true}).openPopup();
-  panTo(arr);
-  locsARR.push(marker);
+    var marker = WE.marker([arr[0], arr[1]]).addTo(earth);
 
 
+    var locSub = "<font size='4' color='red'><strong>Outbreaks in "+place+"</strong></font><br>"
+    var str1 = locSub+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[0].title+"</strong></u></font>"+"<br>"+data.articles[0].description+"<br>"+"<a href= "+data.articles[0].url+">"+"find out more"+"</a>"+"<br>"
+    //console.log(data.articles.length)
+    var limiter = 0;
+    for(i=1; i<data.articles.length; i++){
+      if (limiter < 20){
+        var str2 = "<br>"+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[i].title+"</strong></u></font>"+"<br>"+data.articles[i].description+"<br>"+"<a href= "+data.articles[i].url+">"+"find out more"+"</a>"+"<br>"
+        str1 = str1+str2
+        limiter = limiter+1;
+      }
+    }
 
+
+    var eveSub = "<font size='4' color='red'><strong>Events in "+place+"</strong></font><br>"
+    var str =  eveSub + "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[0].name.text+"</strong></u></font>"+"<br>"+data_event.events[0].description.text+"<br>"+"<a href= "+data_event.events[0].url+">"+"find out more"+"</a>"+"<br>"
+    limiter = 0;
+    console.log("HERE");
+    for(i=1; i<data_event.events.length; i++){
+      if (limiter < 20){
+        str2 = "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[i].name.text+"</strong></u></font>"+"<br>"+data_event.events[i].description.text+"<br>"+"<a href= "+data_event.events[i].url+">"+"find out more"+"</a>"+"<br>"
+        str = str+str2
+        limiter = limiter+1;
+      }
+    }
+
+    var content = '<div class="tabs">' +
+
+              '<div class="tab" id="tab-1">' +
+              '<div class="content-popup">' +
+              '<b id="text1">'+str+'</b>' +
+              '</div>' +
+              '</div>' +
+
+              '<div class="tab" id="tab-2">' +
+              '<div class="content-popup">' +
+              '<b>'+str1+'</b>' +
+              '</div>' +
+              '</div>' +
+
+              '<div class="tab" id="tab-3">' +
+              '<div class="content-popup">' +
+              '<b>Tab 3 content</b>' +
+              '</div>' +
+              '</div>' +
+
+              '<ul class="tabs-link">' +
+              '<li class="tab-link"> <a href="#tab-1"><span>Events</span></a></li>' +
+              '<li class="tab-link"> <a href="#tab-2"><span>Outbreaks</span></a></li>' +
+              '<li class="tab-link"> <a href="#tab-3"><span>Weather</span></a></li>' +
+              '</ul>' +
+          '</div>';
+
+          marker.bindPopup(content, {maxWidth: 500, maxHeight: 2000,  closeButton: true}).openPopup();
+          panTo(arr);
+          locsARR.push(marker);
 }
 
 
@@ -747,7 +746,7 @@ function newsAPI(){
 }
 
 
-function eventsAPI(country, cb){
+function eventsAPI(country, data,  earth, cb){
     var str1 = "<font size='4' color='red'><strong>Events in "+country+"</strong></font><br>";
     var url = "https://www.eventbriteapi.com/v3/events/search/?token=OSUIDAF6IGFCANDO4ZDG&location.address="+country.toLowerCase()+"&location.within=10km&expand=venue";
     fetch(url, {
@@ -757,9 +756,10 @@ function eventsAPI(country, cb){
     .then((resp) => resp.json())
     .then(function(data_event) {
         console.log(data_event);
-        str1 = str1 +  "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[0].name.text+"</strong></u></font>"+"<br>"+data_event.events[0].description+"<br>"+"<a href= "+data_event.events[0].url+">"+"find out more"+"</a>"+"<br>"
-        
-        cb(str1);
+        console.log(data);
+
+
+        cb(data, data_event, country, earth);
     })
 }
 
