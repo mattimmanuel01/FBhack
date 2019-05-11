@@ -1,5 +1,4 @@
 # FBhack
+Usage: python Webserver.py PORT_NUMBER
 
-run it with python Webserver.py PORTNUMBER
-
-and then go to the url http://127.0.0.1:PORTNUMBER
+Then, visit http://127.0.0.1:PORT_NUMBER or http://localhost:PORT_NUMBER
