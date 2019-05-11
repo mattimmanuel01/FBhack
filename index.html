@@ -645,6 +645,7 @@ function getInput() {
           .then(function(data) {
              markLocationsRemove(locsARR);
              eventsAPI(z, data, earth, cb);
+
           })
         }
     }
@@ -656,13 +657,19 @@ function markLocationsRemove(locsAR){
     locsAR[i].removeFrom(earth);
   }
 }
+
+
 function cb(data, data_event, data_weather, place, earth) {
+
+
     var arr = locsCountry(place);
     var locSub = "<font size='4' color='red'><strong>Outbreaks in "+place+"</strong></font><br>"
     if(arr == []){
       return
     }
     var marker = WE.marker([arr[0], arr[1]]).addTo(earth);
+
+
     var locSub = "<font size='4' color='red'><strong>Outbreaks in "+place+"</strong></font><br>"
     var str1 = locSub+"<br>"+"<strong><u><font size='2' color='Steelblue'>"+data.articles[0].title+"</strong></u></font>"+"<br>"+data.articles[0].description+"<br>"+"<a href= "+data.articles[0].url+">"+"find out more"+"</a>"+"<br>"
     //console.log(data.articles.length)
@@ -674,6 +681,8 @@ function cb(data, data_event, data_weather, place, earth) {
         limiter = limiter+1;
       }
     }
+
+
     var eveSub = "<font size='4' color='red'><strong>Events in "+place+"</strong></font><br>"
     var str =  eveSub + "<br>"+"<strong><u><font size='2' color='Steelblue'>"+data_event.events[0].name.text+"</strong></u></font>"+"<br>"+data_event.events[0].description.text+"<br>"+"<a href= "+data_event.events[0].url+">"+"find out more"+"</a>"+"<br>"
     limiter = 0;
@@ -684,6 +693,8 @@ function cb(data, data_event, data_weather, place, earth) {
         limiter = limiter+1;
       }
     }
+
+
     var wthSub = "<font size='4' color='red'><strong>Current Weather in "+place+"</strong></font><br>"
 
 
@@ -699,27 +710,32 @@ function cb(data, data_event, data_weather, place, earth) {
 
 
     var content = '<div class="tabs">' +
+
               '<div class="tab" id="tab-1">' +
               '<div class="content-popup">' +
               '<b id="text1">'+str+'</b>' +
               '</div>' +
               '</div>' +
+
               '<div class="tab" id="tab-2">' +
               '<div class="content-popup">' +
               '<b>'+str1+'</b>' +
               '</div>' +
               '</div>' +
+
               '<div class="tab" id="tab-3">' +
               '<div class="content-popup">' +
               '<b>'+wthSub+'</b>' +
               '</div>' +
               '</div>' +
+
               '<ul class="tabs-link">' +
               '<li class="tab-link"> <a href="#tab-1"><span>Events</span></a></li>' +
               '<li class="tab-link"> <a href="#tab-2"><span>Outbreaks</span></a></li>' +
               '<li class="tab-link"> <a href="#tab-3"><span>Weather</span></a></li>' +
               '</ul>' +
           '</div>';
+
           marker.bindPopup(content, {maxWidth: 500, maxHeight: 2000,  closeButton: true}).openPopup();
           panTo(arr);
           locsARR.push(marker);
@@ -754,6 +770,8 @@ function newsAPI(){
       }
   })
 }
+
+
 function eventsAPI(country, data,  earth, cb){
     var url = "https://www.eventbriteapi.com/v3/events/search/?token=OSUIDAF6IGFCANDO4ZDG&location.address="+country.toLowerCase()+"&location.within=10km&expand=venue";
     fetch(url, {
@@ -762,9 +780,12 @@ function eventsAPI(country, data,  earth, cb){
     })
     .then((resp) => resp.json())
     .then(function(data_event) {
+
         weatherAPI(country, data, data_event, earth, cb);
+
     })
 }
+
 function weatherAPI(country,data, data_event, earth, cb) {
     var coor = locsCountry(country);
     var url = 'http://api.openweathermap.org/data/2.5/weather?lat='+coor[0]+'&lon='+coor[1]+'&appid=01c9d1950104f17307f22b0cc04f8560';
@@ -782,8 +803,11 @@ function weatherAPI(country,data, data_event, earth, cb) {
         console.log(data);
         console.log(data_event);
         console.log(data_weather);
+
         cb(data, data_event, data_weather, country, earth);
     })
+
+
 }
 </script>
 </body>
